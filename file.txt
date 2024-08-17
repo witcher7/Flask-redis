@@ -1,0 +1,72 @@
+#### APP.py
+
+from flask import Flask
+import redis
+
+app = Flask(__name__)
+
+# Connect to Redis
+r = redis.Redis(host='redis', port=6379, db=0)
+
+@app.route('/')
+def index():
+    count = r.incr('counter')
+    return f'Hello, World! This page has been viewed {count} times.'
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)
+
+
+
+### REQUIREMENT.txt
+flask
+redis
+
+#DOCKERFILE
+
+
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Run the application
+CMD ["python", "app.py"]
+
+
+
+
+
+# DOCKER COMPOSE 
+
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+
+docker-compose build 
+docker-compose up 
+
+
+curl IP:5000
